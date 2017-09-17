@@ -1,59 +1,48 @@
-var path = require('path')
-
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const path = require('path');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: [
-    'babel-polyfill',
-    './app/main.js',
-    './app/main.sass'
+  entry: './src/main.js',
+  devtool: 'source-map',
+  devServer: {
+    contentBase: "./dist"
+  },
+  plugins: [
+    new CleanWebpackPlugin(['dist']),
+    new HtmlWebpackPlugin({
+      title: "Output Management",
+      template: "./src/main.pug"
+    }),
+    new ExtractTextPlugin({
+      filename: "main.css",
+      disable: false,
+      allChunks: true
+    })
   ],
   output: {
     filename: '[name].js',
-    publicPath: 'dist',
     path: path.resolve(__dirname, 'dist')
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              ['env', {
-                'debug': true
-              }]
-            ]
-          }
-        }
-      }, {
-        test: /\.s[ac]ss$/,
+        test: /\.sass$/,
         use: ExtractTextPlugin.extract({
-          use: [{
-            loader: 'css-loader',
-            options: {
-              sourceMap: true
-            }
-          }, {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true
-            }
-          }]
+          fallback: "style-loader",
+          use: ["css-loader", "sass-loader"],
+          publicPath: "./dist"
         })
-      }, {
-        test: /\.(slm|slim)/,
-        loader: 'slm'
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        loader: ["file-loader"]
+      },
+      {
+        test: /\.pug$/,
+        loader: ["html-loader", "pug-html-loader"]﻿
       }
     ]
-  },
-  plugins: [
-    new ExtractTextPlugin('main.css'),
-    new HtmlWebpackPlugin({
-      title: 'Flitz',
-      template: 'template.slim'
-    })
-  ]
-}
+  }
+};
